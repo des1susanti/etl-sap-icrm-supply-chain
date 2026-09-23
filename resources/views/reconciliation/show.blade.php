@@ -421,7 +421,9 @@
 
     <ul class="navbar-menu" id="navbarMenu">
         <li><a href="{{ route('dashboard') }}" class="active">Dashboard</a></li>
-        <li><a href="{{ route('upload.index') }}">Upload Data</a></li>
+      @if(auth()->user()->role === 'admin_gudang')
+    <li><a href="{{ route('upload.index') }}">Upload Data</a></li>
+@endif
         <li><a href="{{ route('reconciliation.index') }}">Rekonsiliasi</a></li>
         @if(auth()->user()->role === 'manager')
             <li><a href="{{ route('users.index') }}">Manajemen User</a></li>
@@ -443,6 +445,11 @@
         <div class="page-header">
             <div class="page-header-left">
                 <a href="{{ route('reconciliation.index') }}" class="btn-back">← Kembali</a>
+                <a href="{{ route('reconciliation.pdf', $rekon->id) }}"
+                   class="btn-export-mini"
+                   style="background:#1d4ed8; color:#fff; border-color:#1d4ed8; margin-left:8px; width:auto; display:inline-flex;">
+                    📄 Export Laporan PDF
+                </a>
                 <div>
                     <div class="page-title">
                         Detail Rekonsiliasi

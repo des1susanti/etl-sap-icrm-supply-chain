@@ -30,7 +30,6 @@ Route::post('/logout', [LoginController::class, 'logout'])
 |--------------------------------------------------------------------------
 */
 
-// REVISI DI SINI: Menonaktifkan middleware 'active' sementara untuk pengujian login
 Route::middleware(['auth'])->group(function () {
 
     /*
@@ -70,78 +69,72 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
- /*
-|--------------------------------------------------------------------------
-| RECONCILIATION
-|--------------------------------------------------------------------------
-*/
-
-Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
-
-    Route::get('/', [ReconciliationController::class, 'index'])
-        ->name('index');
-
-    Route::get('/create', [ReconciliationController::class, 'create'])
-        ->name('create');
-
-    Route::post('/', [ReconciliationController::class, 'store'])
-        ->name('store');
-
-    Route::get('/export', [ReconciliationController::class, 'exportExcel'])
-        ->name('export');
-
     /*
     |--------------------------------------------------------------------------
-    | EDIT & UPDATE
+    | RECONCILIATION
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/{id}/edit', [ReconciliationController::class, 'edit'])
-        ->name('edit');
+    Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
 
-    Route::put('/{id}', [ReconciliationController::class, 'update'])
-        ->name('update');
+        Route::get('/', [ReconciliationController::class, 'index'])
+            ->name('index');
 
-    /*
-    |--------------------------------------------------------------------------
-    | EXPORT DETAIL
-    |--------------------------------------------------------------------------
-    */
+        Route::get('/create', [ReconciliationController::class, 'create'])
+            ->name('create');
 
-    Route::get('/{id}/export', [ReconciliationController::class, 'exportDetail'])
-        ->name('export.detail');
+        Route::post('/', [ReconciliationController::class, 'store'])
+            ->name('store');
 
-    /*
-    |--------------------------------------------------------------------------
-    | SHOW DETAIL
-    |--------------------------------------------------------------------------
-    */
+        // Export All Data ke PDF
+        Route::get('/export', [ReconciliationController::class, 'export'])
+            ->name('export');
 
-    Route::get('/{id}', [ReconciliationController::class, 'show'])
-        ->name('show');
+        /*
+        |--------------------------------------------------------------------------
+        | EXPORT DETAIL & PDF PER ITEM
+        |--------------------------------------------------------------------------
+        */
 
-    /*
-    |--------------------------------------------------------------------------
-    | PROCESS & APPROVE
-    |--------------------------------------------------------------------------
-    */
+        Route::get('/{id}/export', [ReconciliationController::class, 'exportDetail'])
+            ->name('export.detail');
 
-    Route::post('/{id}/process', [ReconciliationController::class, 'process'])
-        ->name('process');
+        Route::get('/{id}/pdf', [ReconciliationController::class, 'exportPdf'])
+            ->name('pdf');
 
-    Route::post('/{id}/approve', [ReconciliationController::class, 'approve'])
-        ->middleware('role:manager')
-        ->name('approve');
+        /*
+        |--------------------------------------------------------------------------
+        | SHOW DETAIL
+        |--------------------------------------------------------------------------
+        */
 
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE
-    |--------------------------------------------------------------------------
-    */
+        Route::get('/{id}', [ReconciliationController::class, 'show'])
+            ->name('show');
 
-    Route::delete('/{id}', [ReconciliationController::class, 'destroy'])
-        ->name('destroy');
-});
+        /*
+        |--------------------------------------------------------------------------
+        | PROCESS & APPROVE
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post('/{id}/process', [ReconciliationController::class, 'process'])
+            ->name('process');
+
+        Route::post('/{id}/approve', [ReconciliationController::class, 'approve'])
+            ->middleware('role:manager')
+            ->name('approve');
+
+        /*
+        |--------------------------------------------------------------------------
+        | DELETE
+        |--------------------------------------------------------------------------
+        */
+
+        Route::delete('/{id}', [ReconciliationController::class, 'destroy'])
+            ->name('destroy');
+    });
+
+
     /*
     |----------------------------------------------------------------------
     | PROFILE (semua role bisa akses)

@@ -34,3 +34,4 @@ Thumbs.db
 
 # Uploaded files 
 /storage/app/public/*
+/storage/app/private/*

@@ -261,7 +261,9 @@
 
     <ul class="navbar-menu" id="navbarMenu">
         <li><a href="{{ route('dashboard') }}" class="active">Dashboard</a></li>
-        <li><a href="{{ route('upload.index') }}">Upload Data</a></li>
+        @if(auth()->user()->role === 'admin_gudang')
+    <li><a href="{{ route('upload.index') }}">Upload Data</a></li>
+@endif
         <li><a href="{{ route('reconciliation.index') }}">Rekonsiliasi</a></li>
         @if(auth()->user()->role === 'manager')
             <li><a href="{{ route('users.index') }}">Manajemen User</a></li>

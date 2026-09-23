@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Exports\RekonsiliasiExport;
 use App\Exports\DetailRekonsiliasiExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReconciliationController extends Controller
 {
@@ -81,22 +82,22 @@ class ReconciliationController extends Controller
     |--------------------------------------------------------------------------
     */
 
-  public function update(Request $request, $id)
-{
-    $request->validate([
-        'periode' => 'required',
-    ]);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'periode' => 'required',
+        ]);
 
-    $rekon = Reconciliation::findOrFail($id);
+        $rekon = Reconciliation::findOrFail($id);
 
-    $rekon->update([
-        'periode' => $request->periode,
-    ]);
+        $rekon->update([
+            'periode' => $request->periode,
+        ]);
 
-    return redirect()
-        ->route('reconciliation.show', $rekon->id)
-        ->with('success', 'Periode berhasil diperbarui.');
-}
+        return redirect()
+            ->route('reconciliation.show', $rekon->id)
+            ->with('success', 'Periode berhasil diperbarui.');
+    }
 
     public function store(Request $request)
     {
@@ -343,7 +344,14 @@ class ReconciliationController extends Controller
             $fileName
         );
     }
+public function export(Request $request)
+{
+    $reconciliations = Reconciliation::with('user')->get();
 
+    $pdf = Pdf::loadView('reconciliation.pdf-all', compact('reconciliations'));
+
+    return $pdf->download('Data_Rekonsiliasi.pdf');
+}
     public function exportExcel()
     {
         $fileName = 'laporan_rekonsiliasi_all_' . date('Y-m-d') . '.xlsx';
@@ -351,6 +359,44 @@ class ReconciliationController extends Controller
         return Excel::download(new RekonsiliasiExport, $fileName);
     }
 
+    public function exportPdf($id)
+    {
+        ini_set('memory_limit', '512M');
+        set_time_limit(120);
+
+        $rekon = Reconciliation::with(['user', 'approvedBy', 'results'])->findOrFail($id);
+
+        $results = $rekon->results ?? collect();
+        $total   = $results->count();
+
+        $matched = $mismatchDiff = $sapOnly = $icrmOnly = 0;
+
+        foreach ($results as $row) {
+            $dbSt = $row->status ?? 'mismatch';
+            if ($dbSt === 'match') {
+                $matched++;
+            } elseif (!empty($row->sap_material) && !empty($row->icrm_material)) {
+                $mismatchDiff++;
+            } elseif (!empty($row->sap_material) && empty($row->icrm_material)) {
+                $sapOnly++;
+            } else {
+                $icrmOnly++;
+            }
+        }
+
+        $mismatch = $mismatchDiff + $sapOnly + $icrmOnly;
+
+        $pdf = Pdf::loadView('reconciliation.pdf', compact(
+            'rekon', 'results', 'total', 'matched', 'mismatch', 'sapOnly', 'icrmOnly'
+        ))->setPaper('a4', 'landscape');
+
+        $fileName = 'Laporan_Rekonsiliasi_'
+            . str_replace('/', '-', $rekon->periode)
+            . '_REP-' . str_pad($rekon->id, 8, '0', STR_PAD_LEFT)
+            . '.pdf';
+
+        return $pdf->download($fileName);
+    }
     public function process($id)
     {
         return back();

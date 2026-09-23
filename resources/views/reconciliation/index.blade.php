@@ -81,7 +81,7 @@
         .btn-export {
             display: flex; align-items: center; gap: 8px;
             height: 44px; padding: 0 22px;
-            background: linear-gradient(135deg, #16a34a, #15803d);
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
             color: #fff; border: none; border-radius: 10px;
             font-size: 14px; font-weight: 600;
             cursor: pointer; text-decoration: none;
@@ -90,9 +90,9 @@
             flex-shrink: 0;
         }
         .btn-export:hover {
-            background: linear-gradient(135deg, #15803d, #166534);
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(22,163,74,0.25);
+            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.25);
             color: #fff;
         }
 
@@ -326,138 +326,98 @@
             .filter-input { min-width: 100%; }
             .data-table { font-size: 12px; }
         }
-        /* ===== NAVBAR ===== */
-.top-navbar {
-    position: fixed;
-    top: 0; left: 0; width: 100%;
-    z-index: 999;
-    background: #fff;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-}
 
-.navbar-logo img { height: 38px; width: auto; object-fit: contain; }
+        /* ===== HAMBURGER ===== */
+        .btn-hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+        }
+        .btn-hamburger span {
+            display: block;
+            width: 24px; height: 2.5px;
+            background: #3a4a6b;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
 
-.navbar-menu {
-    display: flex; align-items: center;
-    gap: 4px; list-style: none;
-}
-
-.navbar-menu a {
-    font-size: 13.5px; font-weight: 500;
-    color: #3a4a6b; text-decoration: none;
-    padding: 7px 14px; border-radius: 8px;
-    transition: background 0.2s, color 0.2s;
-    white-space: nowrap;
-}
-
-.navbar-menu a:hover, .navbar-menu a.active {
-    background: #eef3ff; color: #0054a6; font-weight: 600;
-}
-
-.btn-logout {
-    font-size: 13px; font-weight: 600;
-    color: #e53935; background: #fff0f0;
-    border: none; padding: 7px 16px;
-    border-radius: 8px; cursor: pointer;
-    transition: background 0.2s; margin-left: 8px;
-}
-.btn-logout:hover { background: #ffd6d6; }
-
-/* ===== HAMBURGER ===== */
-.btn-hamburger {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 8px;
-}
-.btn-hamburger span {
-    display: block;
-    width: 24px; height: 2.5px;
-    background: #3a4a6b;
-    border-radius: 4px;
-    transition: all 0.3s;
-}
-
-@media (max-width: 768px) {
-    .top-navbar { padding: 0 16px; }
-    .btn-hamburger { display: flex; }
-    .navbar-menu {
-        display: none;
-        position: fixed;
-        top: 64px; left: 0;
-        width: 100%;
-        background: #fff;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 12px 16px 20px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        gap: 4px;
-        z-index: 998;
-    }
-    .navbar-menu.open { display: flex; }
-    .navbar-menu li { width: 100%; }
-    .navbar-menu a {
-        display: block;
-        width: 100%;
-        padding: 10px 14px;
-        font-size: 14px;
-    }
-    .btn-logout { margin-left: 0; width: 100%; text-align: left; }
-}
+        @media (max-width: 768px) {
+            .top-navbar { padding: 0 16px; }
+            .btn-hamburger { display: flex; }
+            .navbar-menu {
+                display: none;
+                position: fixed;
+                top: 64px; left: 0;
+                width: 100%;
+                background: #fff;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px 16px 20px;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+                gap: 4px;
+                z-index: 998;
+            }
+            .navbar-menu.open { display: flex; }
+            .navbar-menu li { width: 100%; }
+            .navbar-menu a {
+                display: block;
+                width: 100%;
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+            .btn-logout { margin-left: 0; width: 100%; text-align: left; }
+        }
     </style>
 </head>
 <body>
 
     {{-- ===== NAVBAR ===== --}}
-<nav class="top-navbar">
-    <a href="{{ route('dashboard') }}" class="navbar-logo">
-        <img src="{{ asset('images/icon.png') }}" alt="PLN Icon Plus">
-    </a>
+    <nav class="top-navbar">
+        <a href="{{ route('dashboard') }}" class="navbar-logo">
+            <img src="{{ asset('images/icon.png') }}" alt="PLN Icon Plus">
+        </a>
 
-    <button class="btn-hamburger" onclick="toggleMenu()" id="hamburgerBtn">
-        <span></span><span></span><span></span>
-    </button>
+        <button class="btn-hamburger" onclick="toggleMenu()" id="hamburgerBtn">
+            <span></span><span></span><span></span>
+        </button>
 
-    <ul class="navbar-menu" id="navbarMenu">
-        <li><a href="{{ route('dashboard') }}" class="active">Dashboard</a></li>
-        <li><a href="{{ route('upload.index') }}">Upload Data</a></li>
-        <li><a href="{{ route('reconciliation.index') }}">Rekonsiliasi</a></li>
-        @if(auth()->user()->role === 'manager')
-            <li><a href="{{ route('users.index') }}">Manajemen User</a></li>
-        @endif
-        <li><a href="{{ route('profile.index') }}">Profil User</a></li>
-        <li>
-            <form method="POST" action="{{ route('logout') }}" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn-logout">Keluar</button>
-            </form>
-        </li>
-    </ul>
-</nav>
+        <ul class="navbar-menu" id="navbarMenu">
+         <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
+@if(auth()->user()->role === 'admin_gudang')
+    <li><a href="{{ route('upload.index') }}">Upload Data</a></li>
+@endif
+            <li><a href="{{ route('reconciliation.index') }}" class="active">Rekonsiliasi</a></li>
+            @if(auth()->user()->role === 'manager')
+                <li><a href="{{ route('users.index') }}">Manajemen User</a></li>
+            @endif
+            <li><a href="{{ route('profile.index') }}">Profil User</a></li>
+            <li>
+                <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="btn-logout">Keluar</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
     {{-- ===== MAIN ===== --}}
     <main class="main-content">
 
-   {{-- PAGE HEADER --}}
+        {{-- PAGE HEADER --}}
         <div class="page-header">
             <div>
                 <div class="page-title">Laporan Rekonsiliasi</div>
                 <div class="page-subtitle">Tinjau dan unduh riwayat sinkronisasi data SAP dan ICRM+</div>
             </div>
-           <a href="/reconciliation/export?all=true" class="btn-export">
-    📥 Export Excel
-</a>
-        </div>
-            </div>
+            <a href="{{ route('reconciliation.export') }}" class="btn-export" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                📄 Export PDF
+            </a>
         </div>
 
         {{-- ALERT --}}
@@ -567,33 +527,8 @@
                                 </span>
                             </td>
                             <td>
-    <div style="display:flex; align-items:center; gap:8px;">
-
-        <span>
-            {{ $rekon->periode ?? '-' }}
-        </span>
-
-        <a href="{{ route('reconciliation.edit', $rekon->id) }}"
-           style="
-                font-size:12px;
-                font-weight:600;
-                color:#2563eb;
-                background:#eff6ff;
-                border:1px solid #bfdbfe;
-                padding:4px 10px;
-                border-radius:7px;
-                text-decoration:none;
-                transition:0.2s;
-           "
-           onmouseover="this.style.background='#dbeafe'"
-           onmouseout="this.style.background='#eff6ff'">
-
-            ✏️ Edit
-
-        </a>
-
-    </div>
-</td>
+                                <span>{{ $rekon->periode ?? '-' }}</span>
+                            </td>
                             <td style="font-size:12.5px; color:#7280a0;">
                                 {{ $rekon->created_at->format('d M Y, H:i') }}
                             </td>
@@ -621,27 +556,7 @@
                                 <div class="action-wrap">
                                     <a href="{{ route('reconciliation.show', $rekon->id) }}"
                                        class="btn-detail">Lihat Detail</a>
-                                      <form method="POST" 
-      action="{{ route('reconciliation.destroy', $rekon->id) }}" 
-      style="display:inline;"
-      onsubmit="return confirm('Yakin ingin menghapus data ini? Semua hasil rekonsiliasi juga akan terhapus.')">
-    @csrf
-    @method('DELETE')
-    <button type="submit" 
-            style="
-                font-size: 13px; font-weight: 600;
-                color: #e53935; background: #fff0f0;
-                border: 1.5px solid #fecaca;
-                padding: 6px 14px; border-radius: 8px;
-                cursor: pointer; margin-left: 6px;
-                transition: all 0.2s;
-            "
-            onmouseover="this.style.background='#ffd6d6'"
-            onmouseout="this.style.background='#fff0f0'">
-        🗑️ Hapus
-    </button>
-</form>
-</td>
+
                                     @if(auth()->user()->role === 'manager' && $rekon->status === 'processing')
                                         <form method="POST"
                                               action="{{ route('reconciliation.approve', $rekon->id) }}"
@@ -692,6 +607,6 @@
             menu.classList.remove('open');
         }
     });
-</script>
+    </script>
 </body>
 </html>
