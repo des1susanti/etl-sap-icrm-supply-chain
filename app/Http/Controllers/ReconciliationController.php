@@ -345,29 +345,37 @@ class ReconciliationController extends Controller
         );
     }
 public function export(Request $request)
-{
-    $reconciliations = Reconciliation::with('user')->get();
-
-    $pdf = Pdf::loadView('reconciliation.pdf-all', compact('reconciliations'));
-
-    return $pdf->download('Data_Rekonsiliasi.pdf');
-}
-    public function exportExcel()
     {
-        $fileName = 'laporan_rekonsiliasi_all_' . date('Y-m-d') . '.xlsx';
+        ini_set('memory_limit', '1024M');
+        set_time_limit(300);
 
-        return Excel::download(new RekonsiliasiExport, $fileName);
+        $reconciliations = Reconciliation::with('user')->get();
+
+        $pdf = Pdf::loadView('reconciliation.pdf-all', compact('reconciliations'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+                'chroot'               => public_path(),
+            ]);
+
+        return $pdf->download('Data_Rekonsiliasi.pdf');
     }
 
     public function exportPdf($id)
     {
-        ini_set('memory_limit', '512M');
-        set_time_limit(120);
+        ini_set('memory_limit', '1024M');
+        set_time_limit(300);
 
-        $rekon = Reconciliation::with(['user', 'approvedBy', 'results'])->findOrFail($id);
+        // Ambil rekon beserta relasi user & approvedBy
+        $rekon = Reconciliation::with(['user', 'approvedBy'])->findOrFail($id);
 
-        $results = $rekon->results ?? collect();
-        $total   = $results->count();
+        // Ambil results menggunakan cursor() / chunking / query terpisah agar hemat RAM
+        $results = DB::table('reconciliation_results')
+            ->where('reconciliation_id', $id)
+            ->get();
+
+        $total = $results->count();
 
         $matched = $mismatchDiff = $sapOnly = $icrmOnly = 0;
 
@@ -388,7 +396,12 @@ public function export(Request $request)
 
         $pdf = Pdf::loadView('reconciliation.pdf', compact(
             'rekon', 'results', 'total', 'matched', 'mismatch', 'sapOnly', 'icrmOnly'
-        ))->setPaper('a4', 'landscape');
+        ))->setPaper('a4', 'landscape')
+          ->setOptions([
+              'isHtml5ParserEnabled' => true,
+              'isRemoteEnabled'      => true,
+              'chroot'               => public_path(),
+          ]);
 
         $fileName = 'Laporan_Rekonsiliasi_'
             . str_replace('/', '-', $rekon->periode)
