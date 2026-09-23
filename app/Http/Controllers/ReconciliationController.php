@@ -362,54 +362,67 @@ public function export(Request $request)
         return $pdf->download('Data_Rekonsiliasi.pdf');
     }
 
-    public function exportPdf($id)
-    {
-        ini_set('memory_limit', '1024M');
-        set_time_limit(300);
+   public function exportPdf($id)
+{
+    ini_set('memory_limit', '1024M');
+    set_time_limit(300);
 
-        // Ambil rekon beserta relasi user & approvedBy
-        $rekon = Reconciliation::with(['user', 'approvedBy'])->findOrFail($id);
+    $rekon = Reconciliation::with(['user', 'approvedBy'])->findOrFail($id);
 
-        // Ambil results menggunakan cursor() / chunking / query terpisah agar hemat RAM
-        $results = DB::table('reconciliation_results')
-            ->where('reconciliation_id', $id)
-            ->get();
+    // 1. Hitung total angka statistik langsung dari database (cepat & hemat RAM)
+    $total = DB::table('reconciliation_results')
+        ->where('reconciliation_id', $id)
+        ->count();
 
-        $total = $results->count();
+    $matched = DB::table('reconciliation_results')
+        ->where('reconciliation_id', $id)
+        ->where('status', 'match')
+        ->count();
 
-        $matched = $mismatchDiff = $sapOnly = $icrmOnly = 0;
+    $sapOnly = DB::table('reconciliation_results')
+        ->where('reconciliation_id', $id)
+        ->whereNotNull('sap_material')
+        ->whereNull('icrm_material')
+        ->count();
 
-        foreach ($results as $row) {
-            $dbSt = $row->status ?? 'mismatch';
-            if ($dbSt === 'match') {
-                $matched++;
-            } elseif (!empty($row->sap_material) && !empty($row->icrm_material)) {
-                $mismatchDiff++;
-            } elseif (!empty($row->sap_material) && empty($row->icrm_material)) {
-                $sapOnly++;
-            } else {
-                $icrmOnly++;
-            }
-        }
+    $icrmOnly = DB::table('reconciliation_results')
+        ->where('reconciliation_id', $id)
+        ->whereNull('sap_material')
+        ->whereNotNull('icrm_material')
+        ->count();
 
-        $mismatch = $mismatchDiff + $sapOnly + $icrmOnly;
+    $mismatchDiff = DB::table('reconciliation_results')
+        ->where('reconciliation_id', $id)
+        ->where('status', '!=', 'match')
+        ->whereNotNull('sap_material')
+        ->whereNotNull('icrm_material')
+        ->count();
 
-        $pdf = Pdf::loadView('reconciliation.pdf', compact(
-            'rekon', 'results', 'total', 'matched', 'mismatch', 'sapOnly', 'icrmOnly'
-        ))->setPaper('a4', 'landscape')
-          ->setOptions([
-              'isHtml5ParserEnabled' => true,
-              'isRemoteEnabled'      => true,
-              'chroot'               => public_path(),
-          ]);
+    $mismatch = $mismatchDiff + $sapOnly + $icrmOnly;
 
-        $fileName = 'Laporan_Rekonsiliasi_'
-            . str_replace('/', '-', $rekon->periode)
-            . '_REP-' . str_pad($rekon->id, 8, '0', STR_PAD_LEFT)
-            . '.pdf';
+    // 2. Batasi maksimal 500 baris data pertama untuk tabel detail di PDF agar DomPDF tidak crash di server
+    $results = DB::table('reconciliation_results')
+        ->where('reconciliation_id', $id)
+        ->limit(500)
+        ->get();
 
-        return $pdf->download($fileName);
-    }
+    // 3. Render PDF
+    $pdf = Pdf::loadView('reconciliation.pdf', compact(
+        'rekon', 'results', 'total', 'matched', 'mismatch', 'sapOnly', 'icrmOnly'
+    ))->setPaper('a4', 'landscape')
+      ->setOptions([
+          'isHtml5ParserEnabled' => true,
+          'isRemoteEnabled'      => true,
+          'chroot'               => public_path(),
+      ]);
+
+    $fileName = 'Laporan_Rekonsiliasi_'
+        . str_replace('/', '-', $rekon->periode)
+        . '_REP-' . str_pad($rekon->id, 8, '0', STR_PAD_LEFT)
+        . '.pdf';
+
+    return $pdf->download($fileName);
+}
     public function process($id)
     {
         return back();
